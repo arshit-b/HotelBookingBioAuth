@@ -14,7 +14,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import ReactNativeBiometrics from 'react-native-biometrics';
-import * as Keychain from 'react-native-keychain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {postUserSignup} from './../../api/apiCalls';
 
@@ -178,6 +177,7 @@ const SignInScreen = ({navigation}) => {
         publicKey: publickey,
       }).then(res => {
         console.log('api res: ', res);
+        navigation.goBack();
       });
     }
   };

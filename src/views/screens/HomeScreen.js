@@ -16,9 +16,6 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import COLORS from '../../consts/colors';
 import hotels from '../../consts/hotels';
-import ReactNativeBiometrics from 'react-native-biometrics';
-import * as Keychain from 'react-native-keychain';
-import base64 from 'react-native-base64';
 
 const {width} = Dimensions.get('screen');
 const cardWidth = width / 1.8;
@@ -154,88 +151,7 @@ const HomeScreen = ({navigation}) => {
     );
   };
 
-  const [keyAvailable, setKeyAvailable] = useState(false);
-  const [prevKey, setPrevKey] = useState('');
-  const [prevSig, setPrevsig] = useState('');
-  const checkBioAvailable = async () => {
-    ReactNativeBiometrics.isSensorAvailable().then(resultObject => {
-      const {available, biometryType} = resultObject;
-      console.log(resultObject);
-      if (available && biometryType === ReactNativeBiometrics.TouchID) {
-        console.log('TouchID is supported');
-      } else if (available && biometryType === ReactNativeBiometrics.FaceID) {
-        console.log('FaceID is supported');
-      } else if (
-        available &&
-        biometryType === ReactNativeBiometrics.Biometrics
-      ) {
-        console.log('Biometrics is supported');
-      } else {
-        console.log('Biometrics not supported');
-      }
-    });
-  };
-  const createKey = async () => {
-    ReactNativeBiometrics.createKeys('Confirm fingerprint').then(
-      resultObject => {
-        const {publicKey} = resultObject;
-        console.log('public key', publicKey);
-        // sendPublicKeyToServer(publicKey);
-      },
-    );
-  };
-
-  const bioKeyExist = () => {
-    ReactNativeBiometrics.biometricKeysExist().then(resultObject => {
-      const {keysExist} = resultObject;
-
-      if (keysExist) {
-        console.log('Keys exist', resultObject);
-        setKeyAvailable(true);
-      } else {
-        console.log('Keys do not exist or were deleted');
-      }
-    });
-  };
-
-  const getGenPassword = async () => {
-    try {
-      const credentials = await Keychain.getGenericPassword();
-      if (credentials) {
-        setIsLoggedIn(true);
-        setUserDetails(credentials);
-      } else {
-        console.log('No credentials stored');
-      }
-    } catch (error) {
-      console.log("Keychain couldn't be accessed!", error);
-    }
-  };
-
-  const createSignature = () => {
-    let epochTimeSeconds = Math.round(new Date().getTime() / 1000).toString();
-    let payload = 'some test payload';
-
-    ReactNativeBiometrics.createSignature({
-      promptMessage: 'Sign in',
-      payload: payload,
-    }).then(resultObject => {
-      const {success, signature} = resultObject;
-
-      if (success) {
-        console.log('signature', signature);
-        // verifySignatureWithServer(signature, payload);
-      }
-    });
-  };
-
-  useEffect(() => {
-    checkBioAvailable();
-    bioKeyExist();
-    getGenPassword();
-    // createKey();
-    createSignature();
-  });
+  useEffect(() => {});
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
       <View style={style.header}>
