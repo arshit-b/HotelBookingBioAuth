@@ -12,9 +12,24 @@ import * as Animatable from 'react-native-animatable';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useTheme} from '@react-navigation/native';
+import {useEffect, useState} from 'react/cjs/react.development';
+import AuthContext from '../../context/context';
 
 const SplashScreen = ({navigation}) => {
+  const [credsAvailable, setCredAvailable] = useState(false);
   const {colors} = useTheme();
+
+  const {getUserData} = React.useContext(AuthContext);
+
+  useEffect(() => {
+    getUserData().then(cred => {
+      if (cred === null) {
+        setCredAvailable(false);
+      } else {
+        setCredAvailable(true);
+      }
+    });
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -47,7 +62,12 @@ const SplashScreen = ({navigation}) => {
         </Text>
         <Text style={styles.text}>Sign in with account</Text>
         <View style={styles.button}>
-          <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate(
+                credsAvailable ? 'SignInScreen' : 'SignUpScreen',
+              )
+            }>
             <LinearGradient
               colors={['#08d4c4', '#01ab9d']}
               style={styles.signIn}>

@@ -14,8 +14,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import ReactNativeBiometrics from 'react-native-biometrics';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {postUserSignup} from './../../api/apiCalls';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import {postUserSignup} from './../../api/apiCalls';
+import AuthContext from '../../context/context';
 
 const SignInScreen = ({navigation}) => {
   const [data, setData] = useState({
@@ -27,6 +28,7 @@ const SignInScreen = ({navigation}) => {
   const [isBioAvailable, setIsBioAvailable] = useState(null);
   const [isFingerprintRegistered, setIsFingerprintRegistered] = useState(false);
   const [publickey, setPublickey] = useState(null);
+  const {signUp} = React.useContext(AuthContext);
 
   function validateEmail(email) {
     const re =
@@ -140,20 +142,7 @@ const SignInScreen = ({navigation}) => {
         const publicKey = await createKey();
         setPublickey(publicKey);
         setIsFingerprintRegistered(true);
-        console.log('public key', publicKey);
       }
-    }
-  };
-  const storeData = value => {
-    try {
-      const jsonValue = JSON.stringify(value);
-      AsyncStorage.setItem('@storage_Key', jsonValue).then(val => {
-        console.log('@Json_Key', jsonValue);
-        console.log('@value', val);
-      });
-    } catch (e) {
-      // saving error
-      return e;
     }
   };
 
@@ -164,21 +153,7 @@ const SignInScreen = ({navigation}) => {
 
   const handleSignUp = () => {
     if (canSignUp()) {
-      // store creds in keychain
-      storeData({
-        email: data.email,
-        key: publickey,
-      });
-
-      // send creds to backend
-      postUserSignup({
-        userName: data.username,
-        email: data.email,
-        publicKey: publickey,
-      }).then(res => {
-        console.log('api res: ', res);
-        navigation.goBack();
-      });
+      signUp(data.username, data.email, publickey, navigation);
     }
   };
 
@@ -264,6 +239,15 @@ const SignInScreen = ({navigation}) => {
                 ? `Register Your Fingerprint`
                 : `Biometric is Not Supported`}
             </Text>
+            {isFingerprintRegistered ? (
+              <Animatable.View animation="bounceIn">
+                <Feather
+                  name="check-circle"
+                  color={validateUserName(data.username) ? 'green' : 'red'}
+                  size={20}
+                />
+              </Animatable.View>
+            ) : null}
           </TouchableOpacity>
           <View style={styles.button}>
             <TouchableOpacity style={styles.signIn} onPress={handleSignUp}>
@@ -283,7 +267,7 @@ const SignInScreen = ({navigation}) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.navigate('SignInScreen')}
               style={[
                 styles.signIn,
                 {

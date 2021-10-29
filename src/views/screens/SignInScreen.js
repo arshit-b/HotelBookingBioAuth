@@ -15,53 +15,35 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 
 import {useTheme} from 'react-native-paper';
-import ReactNativeBiometrics from 'react-native-biometrics';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {postUserSignin} from './../../api/apiCalls';
+import AuthContext from '../../context/context';
 
 const SignInScreen = ({navigation}) => {
   const [email, setEmail] = useState(null);
-  const AuthContext = React.createContext();
+  const [credAvailable, setCredAvailable] = useState(false);
   const {colors} = useTheme();
 
-  const createSignature = async () => {};
-
-  const getData = () => {
+  const removeValue = () => {
     try {
-      return AsyncStorage.getItem('@storage_Key').then(jsonValue => {
-        console.log(JSON.parse(jsonValue));
-        return jsonValue != null ? JSON.parse(jsonValue) : null;
+      AsyncStorage.removeItem('@storage_Key').then(() => {
+        navigation.goBack();
+        console.log('user signed out');
       });
     } catch (e) {
-      // error reading value
-      return e;
+      // remove error
     }
   };
+
+  const {signIn, getUserData, signOut} = React.useContext(AuthContext);
+
   useEffect(() => {
-    // getGenPassword();
-    getData().then(data => setEmail(data.email));
+    getUserData();
   }, []);
 
-  const loginHandle = email => {
-    let epochTimeSeconds = Math.round(new Date().getTime() / 1000).toString();
-    let payload = `payload${epochTimeSeconds}`;
-
-    ReactNativeBiometrics.createSignature({
-      promptMessage: 'Sign in',
-      payload: payload,
-    }).then(resultObject => {
-      const {success, signature} = resultObject;
-
-      if (success) {
-        postUserSignin({email, signature, payload}).then(res => {
-          if (res.result) {
-            navigation.navigate('Home');
-          }
-        });
-        // verifySignatureWithServer(signature, payload);
-      }
-    });
+  const handleSignIn = () => {
+    signIn(navigation);
   };
 
   return (
@@ -82,7 +64,7 @@ const SignInScreen = ({navigation}) => {
           <TouchableOpacity
             style={styles.signIn}
             onPress={() => {
-              loginHandle(email);
+              handleSignIn();
             }}>
             <LinearGradient
               colors={['#08d4c4', '#01ab9d']}
@@ -117,6 +99,26 @@ const SignInScreen = ({navigation}) => {
                 },
               ]}>
               Sign Up
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => signOut(navigation)}
+            style={[
+              styles.signIn,
+              {
+                borderColor: '#009387',
+                borderWidth: 1,
+                marginTop: 15,
+              },
+            ]}>
+            <Text
+              style={[
+                styles.textSign,
+                {
+                  color: '#009387',
+                },
+              ]}>
+              Sign Out
             </Text>
           </TouchableOpacity>
         </View>

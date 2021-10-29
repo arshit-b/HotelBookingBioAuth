@@ -11,62 +11,30 @@ import {
   View,
   Image,
   Animated,
+  TextPropTypes,
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {getHotels} from '../../api/apiCalls';
 import COLORS from '../../consts/colors';
 import hotels from '../../consts/hotels';
+import img from '../../assets/hotel1.jpg';
 
 const {width} = Dimensions.get('screen');
 const cardWidth = width / 1.8;
 
 const HomeScreen = ({navigation}) => {
-  const categories = ['All', 'Popular', 'Top Rated', 'Featured', 'Luxury'];
-  const [selectedCategoryIndex, setSelectedCategoryIndex] = React.useState(0);
   const [activeCardIndex, setActiveCardIndex] = React.useState(0);
   const scrollX = React.useRef(new Animated.Value(0)).current;
+  const [hotels, setHotels] = useState(null);
 
-  const CategoryList = ({navigation}) => {
-    return (
-      <View style={style.categoryListContainer}>
-        {categories.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            activeOpacity={0.8}
-            onPress={() => setSelectedCategoryIndex(index)}>
-            <View>
-              <Text
-                style={{
-                  ...style.categoryListText,
-                  color:
-                    selectedCategoryIndex == index
-                      ? COLORS.primary
-                      : COLORS.grey,
-                }}>
-                {item}
-              </Text>
-              {selectedCategoryIndex == index && (
-                <View
-                  style={{
-                    height: 3,
-                    width: 30,
-                    backgroundColor: COLORS.primary,
-                    marginTop: 2,
-                  }}
-                />
-              )}
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
-    );
-  };
   const Card = ({hotel, index}) => {
     const inputRange = [
       (index - 1) * cardWidth,
       index * cardWidth,
       (index + 1) * cardWidth,
     ];
+    // const img = require(hotel.selectedFile);
     const opacity = scrollX.interpolate({
       inputRange,
       outputRange: [0.7, 0, 0.7],
@@ -88,7 +56,7 @@ const HomeScreen = ({navigation}) => {
               ${hotel.price}
             </Text>
           </View>
-          <Image source={hotel.image} style={style.cardImage} />
+          <Image source={img} style={style.cardImage} />
           <View style={style.cardDetails}>
             <View
               style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -140,7 +108,7 @@ const HomeScreen = ({navigation}) => {
             5.0
           </Text>
         </View>
-        <Image style={style.topHotelCardImage} source={hotel.image} />
+        <Image style={style.topHotelCardImage} source={img} />
         <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
           <Text style={{fontSize: 10, fontWeight: 'bold'}}>{hotel.name}</Text>
           <Text style={{fontSize: 7, fontWeight: 'bold', color: COLORS.grey}}>
@@ -151,7 +119,16 @@ const HomeScreen = ({navigation}) => {
     );
   };
 
-  useEffect(() => {});
+  useEffect(() => {
+    getHotels().then(res => {
+      // const hotels = res.map(hotel => {
+      //   const temp = {...hotel};
+      //   temp.image = require(hotel.image);
+      //   return temp;
+      // });
+      setHotels(res);
+    });
+  }, []);
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: COLORS.white}}>
       <View style={style.header}>
